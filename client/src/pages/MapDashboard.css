@@ -1,0 +1,48 @@
+.map-dashboard-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.map-dashboard-container h2 {
+  margin-bottom: 1rem;
+  color: var(--primary-color);
+}
+
+.map-legend {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  background: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  flex-wrap: wrap;
+}
+
+.map-legend span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.map-wrapper {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.map-popup-card {
+  text-align: center;
+}
+
+.map-popup-card h4 {
+  margin: 10px 0 5px;
+  color: var(--primary-color);
+}
+
+.map-popup-card p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+}
