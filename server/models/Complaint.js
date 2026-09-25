@@ -1,18 +1,21 @@
 const mongoose = require('mongoose');
-const { v4: uuidv4 } = require('uuid');
 
 const complaintSchema = new mongoose.Schema({
   complaintId: {
     type: String,
-    default: uuidv4,
-    unique: true
+    unique: true,
+    required: true
   },
   issueType: {
     type: String,
     required: true,
-    enum: ['Garbage', 'Pothole', 'Water Leak', 'Streetlight']
+    enum: ['Pothole', 'Garbage', 'Water Leakage', 'Water Leak', 'Streetlight', 'Drainage', 'Other']
   },
   description: {
+    type: String,
+    required: true
+  },
+  imageUrl: {
     type: String,
     required: true
   },
@@ -26,7 +29,8 @@ const complaintSchema = new mongoose.Schema({
       required: true
     },
     address: {
-      type: String
+      type: String,
+      default: ''
     }
   },
   createdBy: {
@@ -34,23 +38,31 @@ const complaintSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  assignedAuthority: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Authority'
+  },
+  status: {
+    type: String,
+    default: 'ASSIGNED',
+    enum: [
+      'Pending', 'Submitted', 'Assigned', 'Acknowledged', 'In Progress', 'Resolved', 'Escalated', 'Needs Attention',
+      'PENDING', 'SUBMITTED', 'ASSIGNED', 'ACKNOWLEDGED', 'IN PROGRESS', 'RESOLVED', 'ESCALATED', 'NEEDS ATTENTION'
+    ]
+  },
   isRead: {
     type: Boolean,
     default: false
   },
-  imageUrl: {
-    type: String,
-    required: true
+  needsAdminReview: {
+    type: Boolean,
+    default: false
   },
-  status: {
-    type: String,
-    default: 'Pending',
-    enum: ['Pending', 'In Progress', 'Resolved']
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
+  resolvedAt: {
+    type: Date
   }
+}, {
+  timestamps: true
 });
 
 module.exports = mongoose.model('Complaint', complaintSchema);

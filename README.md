@@ -1,59 +1,71 @@
-# CivicLens - Human-Centered Civic Issue Reporting 🏛️📸
+# CivicLens — Role-Based Civic Complaint Reporting & Resolution Platform 🏛️📸
 
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![Express](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
+[![Leaflet](https://img.shields.io/badge/Leaflet-199900?style=for-the-badge&logo=leaflet&logoColor=white)](https://leafletjs.com/)
 
-**CivicLens** is a full-stack web application designed to bridge the gap between citizens and municipal authorities. It empowers users to report urban problems—such as potholes, garbage, or water leaks—directly with photographic evidence, ensuring transparency and accountability in civic management.
+**CivicLens v2.0** is a full-stack civic complaint reporting and municipal resolution platform. It bridges the gap between citizens and local government by offering photo- and GPS-based reporting, automated database-driven department routing, role-based workflows for municipal staff, real-time map visualization, and system-wide administrative analytics.
 
-## 🌟 Key Features
+---
 
-- **🚀 Seamless Reporting:** Quick submission of issues with descriptions, geolocation, and image attachments.
-- **🖼️ Secure Image Hosting:** Robust integration with **Cloudinary** for reliable storage of evidence photos.
-- **📊 Public Dashboard:** A modern, card-based interface providing a transparent view of all reported issues.
-- **🔄 Real-Time Updates:** Instant status synchronization (Pending ➔ In Progress ➔ Resolved).
-- **⏳ Dynamic Escalation:** Automatic tagging of unresolved issues based on age:
-  - ⚠️ **Needs Attention** (3+ days)
-  - 🚨 **Escalated** (7+ days)
-- **📩 Hybrid Notifications:**
-  - **Email Alerts:** Reliable notifications sent to admins via **Nodemailer**.
-  - **Simulated SMS/WhatsApp:** Terminal-based logging for authority notifications.
+## 🌟 Key Capabilities (v2.0 Release)
+
+- **👥 Role-Based Access Control (RBAC):** Distinct workflows for **Citizens**, **Authority Staff**, and **Administrators** secured via JWT authentication.
+- **⚡ Automatic Authority Routing:** Complaint submission automatically matches issue type (`Pothole`, `Garbage`, `Water Leak`, `Streetlight`, `Drainage`, `Other`) and geographic location/area to active municipal department records (`Roads Dept`, `Sanitation Dept`, `Water Supply Dept`, `Electrical Dept`, `Drainage Dept`, `General Municipal Dept`).
+- **📸 Evidence Capture & Cloud Storage:** Photo evidence uploaded via camera or device storage directly to **Cloudinary**.
+- **📍 GPS & Reverse Geocoding:** Auto-captures browser location or accepts manual address input with OpenStreetMap Nominatim reverse-geocoding.
+- **🗺️ Interactive Complaint Map:** Browser-based Leaflet map rendering status color-coded markers (Amber: Pending, Blue: In Progress, Green: Resolved, Red: Escalated) with slide-out incident inspection panels.
+- **📩 Centralized Notification Engine:** Outbound email notifications via **Nodemailer** to routed authorities upon submission and to citizens on status change, paired with simulated SMS and WhatsApp audit logging.
+- **📊 Admin System Overview & Analytics:** Live analytics tracking total complaints, active authority records, age-based escalations (3+ days: Needs Attention, 7+ days: Escalated), average resolution times, and routing gap resolution ("Needs Admin Review").
+
+---
+
+## 👥 Role Overview & Demo Login Credentials
+
+The database auto-seeds default authorities and demo accounts on startup:
+
+| Role | Email | Password | Primary Interface & Responsibilities |
+| :--- | :--- | :--- | :--- |
+| **Citizen (`USER`)** | `citizen@civiclens.gov` | `password123` | **Report Issue & My Complaints:** Report civic issues with photo/GPS; track status progression and routed department names. |
+| **Authority Staff (`AUTHORITY`)** | `authority@civiclens.gov` | `password123` | **Department Queue:** Filter and manage department workload; update statuses (`ACKNOWLEDGED`, `In Progress`, `Resolved`); inspect incident map. |
+| **Administrator (`ADMIN`)** | `admin@civiclens.gov` | `password123` | **System Overview:** Oversee platform metrics; manage Authority Records (+ Add / Toggle Active); reassign fallback-routed complaints; inspect city-wide map. |
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **Framework:** React.js (Vite)
-- **Styling:** Vanilla CSS (Custom Design System)
-- **State Management:** React Hooks
-- **Routing:** React Router DOM
+- **Framework:** React.js 19 (Vite)
+- **Routing:** React Router DOM v7
+- **Mapping:** Leaflet & React-Leaflet
+- **Styling:** Custom CSS Design System (Color Palette: Primary Navy `#1F3864`, Accent `#2E5395`, Surface `#F4F5F7`)
+- **Camera:** React Webcam
 
 ### Backend
-- **Runtime:** Node.js
-- **Framework:** Express.js
+- **Runtime:** Node.js / Express.js
 - **Database:** MongoDB (Mongoose ODM)
-- **Service Integration:** Cloudinary, Nodemailer
+- **Security & Auth:** JWT (`jsonwebtoken`), `bcryptjs` password hashing
+- **Services:** Cloudinary (Multer storage), Nodemailer (SMTP), Custom Routing Service
 
 ---
 
 ## ⚙️ Setup & Installation
 
 ### Prerequisites
-- [Node.js](https://nodejs.org/) installed
-- [MongoDB](https://www.mongodb.com/) (Local or Atlas)
-- [Cloudinary](https://cloudinary.com/) account for image storage
-- Gmail account with [App Passwords](https://support.google.com/accounts/answer/185833) enabled for Nodemailer
+- [Node.js](https://nodejs.org/) (v18+ recommended)
+- [MongoDB](https://www.mongodb.com/) (Local instance or MongoDB Atlas URI)
+- [Cloudinary](https://cloudinary.com/) Account (for photo storage)
 
 ### 1. Clone the Repository
 ```bash
-git clone <your-repo-url>
-cd civic-lens
+git clone https://github.com/Nikhilll-dev-code/CivicLens.git
+cd CivicLens
 ```
 
-### 2. Backend Setup
-1. Navigate to the server folder:
+### 2. Backend Environment Setup
+1. Navigate to the server directory:
    ```bash
    cd server
    ```
@@ -61,22 +73,22 @@ cd civic-lens
    ```bash
    npm install
    ```
-3. Create a `.env` file in the `server` directory (use `.env.example` as a template):
+3. Create a `.env` file inside `server/` (refer to `.env.example`):
    ```env
    PORT=5000
-   MONGO_URI=your_mongodb_uri
+   MONGO_URI=mongodb://127.0.0.1:27017/civiclens
    CLOUDINARY_CLOUD_NAME=your_cloud_name
    CLOUDINARY_API_KEY=your_api_key
    CLOUDINARY_API_SECRET=your_api_secret
    EMAIL_USER=your_email@gmail.com
    EMAIL_PASS=your_app_password
-   JWT_SECRET=your_jwt_secret
+   JWT_SECRET=super_secret_jwt_key_civiclens_2026
    ```
 
 ### 3. Frontend Setup
-1. Navigate to the client folder:
+1. Open a new terminal and navigate to the client directory:
    ```bash
-   cd ../client
+   cd client
    ```
 2. Install dependencies:
    ```bash
@@ -87,40 +99,48 @@ cd civic-lens
 
 ## 🚀 Running the Application
 
-You need to run both the server and client concurrently.
-
-### 🔌 Start Server
+### 🔌 1. Start Server (Backend)
 ```bash
 cd server
 npm run dev
 ```
-*The server will start on [http://localhost:5000](http://localhost:5000)*
+*Server runs on [http://localhost:5000](http://localhost:5000)*
 
-### 💻 Start Client
+### 💻 2. Start React App (Frontend)
 ```bash
 cd client
 npm run dev
 ```
-*The UI will be accessible at [http://localhost:5173](http://localhost:5173)*
+*Client web app runs on [http://localhost:5173](http://localhost:5173)*
 
 ---
 
-## 🤝 Contributing
+## 📡 Key REST API Endpoints
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+### Auth Routes (`/api/auth`)
+- `POST /api/auth/register` — Create citizen account
+- `POST /api/auth/login` — Sign in and receive JWT + role details
+- `GET /api/auth/me` — Authenticated profile lookup
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+### Complaint Routes (`/api/complaints`)
+- `POST /api/complaints` — Submit complaint (Uploads image, auto-routes authority, dispatches notifications)
+- `GET /api/complaints/mine` — List logged-in citizen's complaints
+- `GET /api/complaints/assigned` — List assigned department queue for authority staff
+- `GET /api/complaints` — System-wide complaints list (Admin)
+- `PATCH /api/complaints/:id/status` — Update status (`ACKNOWLEDGED`, `In Progress`, `Resolved`, `Escalated`)
+- `PATCH /api/complaints/:id/read` — Toggle read status
+- `PATCH /api/complaints/:id/reassign` — Reassign complaint to a different authority (Admin)
+
+### Authority Routes (`/api/authorities`)
+- `GET /api/authorities` — List authority records
+- `POST /api/authorities` — Create new authority record (Admin)
+- `PATCH /api/authorities/:id` — Update or toggle active state (Admin)
+
+### Analytics Routes (`/api/analytics`)
+- `GET /api/analytics` — Platform-wide statistics, status counts, breakdown metrics, and admin review items (Admin)
 
 ---
 
 ## 📄 License
 
 Distributed under the MIT License. See `LICENSE` for more information.
-
----
-
-**Built with ❤️ for a better community.**

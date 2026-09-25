@@ -16,13 +16,19 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['USER', 'ADMIN'],
+    enum: ['USER', 'AUTHORITY', 'ADMIN'],
     default: 'USER'
   },
-  createdAt: {
-    type: Date,
-    default: Date.now
+  department: {
+    type: String,
+    default: ''
+  },
+  area: {
+    type: String,
+    default: ''
   }
+}, {
+  timestamps: true
 });
 
 module.exports = mongoose.model('User', userSchema);

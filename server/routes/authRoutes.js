@@ -2,17 +2,22 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { verifyToken } = require('../middleware/auth');
 
 const router = express.Router();
 
 // Register new user
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, department, area } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: 'Name, email, and password are required.' });
+    }
     
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ error: 'User already exists' });
+      return res.status(400).json({ error: 'User with this email already exists.' });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -22,14 +27,16 @@ router.post('/register', async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role: 'USER'
+      role: role && ['USER', 'AUTHORITY', 'ADMIN'].includes(role) ? role : 'USER',
+      department: department || '',
+      area: area || ''
     });
 
     const savedUser = await newUser.save();
 
     const token = jwt.sign(
       { id: savedUser._id, role: savedUser.role },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || 'fallback_secret',
       { expiresIn: '7d' }
     );
 
@@ -39,12 +46,14 @@ router.post('/register', async (req, res) => {
         id: savedUser._id,
         name: savedUser.name,
         email: savedUser.email,
-        role: savedUser.role
+        role: savedUser.role,
+        department: savedUser.department,
+        area: savedUser.area
       }
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Server error during registration' });
+    console.error('Registration error:', error);
+    res.status(500).json({ error: 'Server error during registration.' });
   }
 });
 
@@ -53,19 +62,23 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required.' });
+    }
+
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ error: 'Invalid credentials' });
+      return res.status(400).json({ error: 'Invalid credentials.' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ error: 'Invalid credentials' });
+      return res.status(400).json({ error: 'Invalid credentials.' });
     }
 
     const token = jwt.sign(
       { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || 'fallback_secret',
       { expiresIn: '7d' }
     );
 
@@ -75,13 +88,29 @@ router.post('/login', async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        department: user.department,
+        area: user.area
       }
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Server error during login' });
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Server error during login.' });
   }
+});
+
+// Get current user profile
+router.get('/me', verifyToken, async (req, res) => {
+  res.json({
+    user: {
+      id: req.user._id,
+      name: req.user.name,
+      email: req.user.email,
+      role: req.user.role,
+      department: req.user.department,
+      area: req.user.area
+    }
+  });
 });
 
 module.exports = router;
